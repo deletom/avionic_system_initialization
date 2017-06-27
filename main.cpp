@@ -28,9 +28,9 @@ using namespace boost;
 //-----------------------------
 //----- Prototypes 	  -----
 //-----------------------------
-int diagnostic_thread();
-int imu_thread();
-int link_thread();
+void diagnostic_thread();
+void imu_thread();
+void link_thread();
 
 //-----------------------------
 //----- Fonction Main	  -----
@@ -44,15 +44,15 @@ int main(int argc, char** argv) {
     // Ouverture du fichier ini
     ifstream fichier("./config.ini", ios::in);
 
+    // Redis : On instancie l'objet (Connexion Redis)
+    Redis objRedis;
+
     if (fichier) // si l'ouverture a réussi
     {
         // Contenu de la ligne en cours
         string line;
         // Contenu de la section en cours
         string currentPrefixKey = "";
-
-        // Redis : On instancie l'objet (Connexion Redis)
-        Redis objRedis;
 
         // On scrute l'ensemble du fichier
         while (getline(fichier, line)) {
@@ -85,16 +85,20 @@ int main(int argc, char** argv) {
         cerr << "Impossible d'ouvrir le fichier !" << endl;
     }
 
+    // On initialise un vol, pour l'instant, nous le lançons en dur.
+    // A terme, la station sol s'en occupera
+    objRedis.setDataSimple("current_flight_inprogress", "1");
 
     /*
      * On initialise le reste du système
      */
     // Lancement du Thread Diagnostic
     std::thread t1(diagnostic_thread);
-    // Lancement du Thread IMU
-    std::thread t2(imu_thread);
     // Lancement du Thread Link EarthStation
-    std::thread t3(link_thread);
+    std::thread t2(link_thread);
+    // Lancement du Thread IMU
+    std::thread t3(imu_thread);
+
 
     // On Attente la fin des Thread pour finir le programme
     t1.join();
@@ -110,24 +114,21 @@ int main(int argc, char** argv) {
 //----- Diagnostique	  -----
 //-----------------------------
 
-int diagnostic_thread() {
+void diagnostic_thread() {
+    
+    cout << "DIAGNOSTIC" << endl;
 
     int indexNbrExecSystem = 0;
     bool flagContinueExecution = true;
-    int typeReturn = EXIT_SUCCESS;
 
     while (flagContinueExecution) {
         system(PATH_DIAGNOSTIC);
-
         indexNbrExecSystem++;
 
         if (indexNbrExecSystem == 2) {
-            typeReturn = EXIT_FAILURE;
             flagContinueExecution = false;
         }
     }
-
-    return typeReturn;
 }
 
 
@@ -135,44 +136,40 @@ int diagnostic_thread() {
 //----- IMU               -----
 //-----------------------------
 
-int imu_thread() {
+void imu_thread() {
+    
+    cout << "IMU" << endl;
 
     int indexNbrExecSystem = 0;
     bool flagContinueExecution = true;
-    int typeReturn = EXIT_SUCCESS;
 
     while (flagContinueExecution) {
         system(PATH_IMU);
-
         indexNbrExecSystem++;
 
         if (indexNbrExecSystem == 2) {
-            typeReturn = EXIT_FAILURE;
             flagContinueExecution = false;
         }
     }
-
-    return typeReturn;
 }
 
 //-----------------------------
 //----- Link EarthStation -----
 //-----------------------------
-int link_thread() {
+
+void link_thread() {
+    
+    cout << "LINK" << endl;
+    
     int indexNbrExecSystem = 0;
     bool flagContinueExecution = true;
-    int typeReturn = EXIT_SUCCESS;
 
     while (flagContinueExecution) {
         system(PATH_LINK_EARTHSTATION);
-
         indexNbrExecSystem++;
 
         if (indexNbrExecSystem == 2) {
-            typeReturn = EXIT_FAILURE;
             flagContinueExecution = false;
         }
     }
-
-    return typeReturn;
 }
