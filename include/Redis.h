@@ -7,17 +7,18 @@
 using namespace std;
 using namespace redis3m;
 
-class Redis
-{
-	public:
-		Redis();
-		bool setDataList(std::string key, vector<std::string> data);
-		bool setDataSimple(std::string key, std::string data);
-		
-		std::string getDataSimple(std::string key);
+class Redis {
+public:
+    Redis();
+    bool setDataList(std::string key, vector<std::string> data);
+    bool setDataSimple(std::string key, std::string data);
+    void setDataConfig();
 
-	private:
-		connection::ptr_t m_conn;
+
+    std::string getDataSimple(std::string key);
+
+private:
+    connection::ptr_t m_conn;
 };
 
 #endif // DEF_REDIS
