@@ -68,7 +68,6 @@ void diagnostic_thread() {
     Redis objRedis;
 
     if (objRedis.getDataSimple("config_system_module_enabled_diagnostic") == "true") {
- 
         int indexNbrExecSystem = 0;
         bool flagContinueExecution = true;
 
@@ -92,7 +91,6 @@ void imu_thread() {
     Redis objRedis;
 
     if (objRedis.getDataSimple("config_system_module_enabled_imu") == "true") {
-
         int indexNbrExecSystem = 0;
         bool flagContinueExecution = true;
 
@@ -115,7 +113,6 @@ void link_thread() {
     Redis objRedis;
 
     if (objRedis.getDataSimple("config_system_module_enabled_link") == "true") {
-
         int indexNbrExecSystem = 0;
         bool flagContinueExecution = true;
 
