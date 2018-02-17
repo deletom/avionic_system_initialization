@@ -1,3 +1,8 @@
+/**
+ * Module d'initialisation de l'avionique
+ * Auteur : Thomas DELECOURT
+ */
+
 //-----------------------------
 //----- INCLUDE 	  -----
 //-----------------------------
@@ -6,16 +11,16 @@
 #include <thread>
 #include <string>
 #include <vector>
-
 #include "Redis.h"
 
 //-----------------------------
 //----- DEFINE 		  -----
 //-----------------------------
 
-#define PATH_DIAGNOSTIC "/home/pi/appli/Diagnostic/diagnostic_debug"
-#define PATH_IMU "/home/pi/appli/IMU/avionic_debug"
-#define PATH_LINK_EARTHSTATION "/home/pi/appli/Link_earthstation/sock_client_debug"
+#define PATH_DIAGNOSTIC         "/home/pi/appli/avionic_diagnostic/diagnostic_debug"
+#define PATH_IMU                "/home/pi/appli/avionic_imu/avionic_debug"
+#define PATH_LINK_EARTHSTATION  "/home/pi/appli/avionic_link_earthstation/link_debug"
+#define PATH_SHUTDOWN           "/home/pi/appli/avionic_shutdown/shutdown_debug"
 
 //-----------------------------
 //----- Namespace 	  -----
@@ -35,9 +40,7 @@ void link_thread();
 
 int main(int argc, char** argv) {
 
-    /*
-     * On initialise les données sous Redis
-     */
+    //On initialise les données sous Redis
     Redis objRedis;
     objRedis.setDataConfig();
 
@@ -56,6 +59,9 @@ int main(int argc, char** argv) {
     t2.join();
     t3.join();
 
+    // On coupe l'ensemble du système
+    system(PATH_SHUTDOWN);
+    
     return EXIT_SUCCESS;
 }
 
@@ -67,10 +73,16 @@ int main(int argc, char** argv) {
 void diagnostic_thread() {
     Redis objRedis;
 
+    // Vérification si la configuration autorise le lancement du module diagnostique
     if (objRedis.getDataSimple("config_system_module_enabled_diagnostic") == "true") {
         int indexNbrExecSystem = 0;
         bool flagContinueExecution = true;
+        
+        // Pose d'un flag montrant que le module est encore en vie
+        objRedis.setDataSimple("proc_diag", "1");
 
+        // On lance la boucle d'exécution du module
+        // Celle-ci relance le module 2 fois en cas de plantage
         while (flagContinueExecution) {
             system(PATH_DIAGNOSTIC);
             indexNbrExecSystem++;
@@ -80,6 +92,7 @@ void diagnostic_thread() {
             }
         }
     }
+    objRedis.setDataSimple("proc_diag", "0");
 }
 
 
@@ -90,10 +103,16 @@ void diagnostic_thread() {
 void imu_thread() {
     Redis objRedis;
 
+    // Vérification si la configuration autorise le lancement de la centrale inertielle
     if (objRedis.getDataSimple("config_system_module_enabled_imu") == "true") {
         int indexNbrExecSystem = 0;
         bool flagContinueExecution = true;
 
+        // Pose d'un flag montrant que le module est encore en vie
+        objRedis.setDataSimple("proc_imu", "1");
+
+        // On lance la boucle d'exécution du module
+        // Celle-ci relance le module 2 fois en cas de plantage
         while (flagContinueExecution) {
             system(PATH_IMU);
             indexNbrExecSystem++;
@@ -103,6 +122,7 @@ void imu_thread() {
             }
         }
     }
+    objRedis.setDataSimple("proc_imu", "0");
 }
 
 //-----------------------------
@@ -112,10 +132,16 @@ void imu_thread() {
 void link_thread() {
     Redis objRedis;
 
+    // Vérification si la configuration autorise le lancement de la télémétrie
     if (objRedis.getDataSimple("config_system_module_enabled_link") == "true") {
         int indexNbrExecSystem = 0;
         bool flagContinueExecution = true;
 
+        // Pose d'un flag montrant que le module est encore en vie
+        objRedis.setDataSimple("proc_link", "1");
+
+        // On lance la boucle d'exécution du module
+        // Celle-ci relance le module 2 fois en cas de plantage
         while (flagContinueExecution) {
             system(PATH_LINK_EARTHSTATION);
             indexNbrExecSystem++;
@@ -125,4 +151,5 @@ void link_thread() {
             }
         }
     }
+    objRedis.setDataSimple("proc_link", "0");
 }

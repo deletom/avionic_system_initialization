@@ -8,7 +8,7 @@ LD_LIBRARY_PATH=/usr/local/lib && export LD_LIBRARY_PATH
 
 # On lance l'initialisation du systeme
 cd $APPLI_PATH
-cd System_initialization
+cd avionic_initialization
 ./system_initialize_debug
 
 exit 0
