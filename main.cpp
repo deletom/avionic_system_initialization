@@ -75,13 +75,13 @@ int main(int argc, char** argv) {
     // Lancement du Thread IMU
     std::thread t1(imu_thread);
     // Lancement du Thread Diagnostic
-    std::thread t2(diagnostic_thread);
+    //std::thread t2(diagnostic_thread);
     // Lancement du Thread Link EarthStation
     std::thread t3(link_thread);
 
     // On Attente la fin des Thread pour finir le programme
     t1.join();
-    t2.join();
+    //t2.join();
     t3.join();
 
     // On coupe l'ensemble du système
